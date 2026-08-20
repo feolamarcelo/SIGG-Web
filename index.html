@@ -108,6 +108,14 @@
   .premise-grid div{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line);padding:4px 0;}
   .premise-grid span:first-child{color:var(--muted);}
 
+  .nome-input{
+    width:100%;padding:11px 14px;margin-bottom:10px;
+    border:1px solid var(--line);border-radius:8px;
+    font-family:var(--sans);font-size:14px;color:var(--ink);
+    background:var(--panel);
+  }
+  .nome-input:focus{outline:none;border-color:var(--teal);}
+
   .calc-btn{
     width:100%;padding:14px;border:none;border-radius:8px;
     background:var(--teal);color:#fff;font-size:15px;font-weight:600;
@@ -152,6 +160,21 @@
     font-family:var(--mono);font-size:11.5px;overflow-x:auto;margin-top:10px;
   }
 
+  .historico{margin-top:44px;}
+  .historico-lista{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;
+  }
+  .historico-item{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;
+  }
+  .historico-item:last-child{border-bottom:none;}
+  .historico-nome{font-weight:600;color:var(--teal-dark);}
+  .historico-periodo{color:var(--muted);font-size:12px;margin-top:2px;}
+  .historico-data{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;}
+  .historico-vazio{padding:16px;color:var(--muted);font-size:13px;text-align:center;}
+
   footer{margin-top:48px;font-size:11.5px;color:var(--muted);text-align:center;}
 </style>
 </head>
@@ -192,7 +215,8 @@
     <div class="premise-grid" id="premise-grid"></div>
   </details>
 
-  <span class="step-label">2. Calcular</span>
+  <span class="step-label">2. Calcular e gravar</span>
+  <input type="text" id="nome-simulacao" placeholder="Nome desta simulação (ex: Agosto 2026)" class="nome-input">
   <button class="calc-btn" id="calc-btn" disabled>Carregue os dois arquivos para calcular</button>
   <div class="loading" id="loading">
     <div class="spinner"></div>
@@ -208,11 +232,18 @@
     </details>
   </div>
 
+  <div class="historico">
+    <span class="step-label">Simulações salvas</span>
+    <div id="historico-lista" class="historico-lista">
+      <div class="historico-vazio">Carregando...</div>
+    </div>
+  </div>
+
   <footer>SIGG-Core · API em produção: sigg-core.onrender.com</footer>
 </div>
 
 <script>
-const API_URL = "https://sigg-core.onrender.com/simular";
+const API_URL = "https://sigg-core.onrender.com/simulacoes";
 
 let pnlData = null;
 let relData = null;
@@ -468,6 +499,33 @@ async function handleFile(kind, file){
   });
 });
 
+async function carregarHistorico(){
+  const el = document.getElementById('historico-lista');
+  try{
+    const resp = await fetch('https://sigg-core.onrender.com/simulacoes');
+    const lista = await resp.json();
+    if (!Array.isArray(lista) || lista.length === 0){
+      el.innerHTML = '<div class="historico-vazio">Nenhuma simulação salva ainda.</div>';
+      return;
+    }
+    el.innerHTML = lista.map(s => {
+      const data = s.data_criacao ? new Date(s.data_criacao).toLocaleString('pt-BR') : '';
+      const periodo = (s.periodo_inicio || s.periodo_fim)
+        ? `${s.periodo_inicio || '?'} → ${s.periodo_fim || '?'}` : '';
+      return `<div class="historico-item">
+        <div>
+          <div class="historico-nome">#${s.id} — ${s.nome || 'Sem nome'}</div>
+          ${periodo ? `<div class="historico-periodo">${periodo}</div>` : ''}
+        </div>
+        <div class="historico-data">${data}</div>
+      </div>`;
+    }).join('');
+  } catch(err){
+    el.innerHTML = '<div class="historico-vazio">Não foi possível carregar o histórico agora.</div>';
+  }
+}
+carregarHistorico();
+
 document.getElementById('calc-btn').addEventListener('click', async () => {
   if (!pnlData || !relData) return;
   clearStatus();
@@ -488,7 +546,8 @@ document.getElementById('calc-btn').addEventListener('click', async () => {
     receita_extra_por_dormida: pnlData.receita_extra_por_dormida,
     uh_ocupadas: relData.uh_ocupadas,
     dias_periodo: relData.dias_periodo,
-    produtividade_governanca: 20
+    produtividade_governanca: 20,
+    nome: document.getElementById('nome-simulacao').value.trim() || undefined
   };
 
   try{
@@ -502,7 +561,9 @@ document.getElementById('calc-btn').addEventListener('click', async () => {
       throw new Error(json.erro || ('A API respondeu com erro ' + resp.status));
     }
     renderResults(json);
-    setStatus('Simulação calculada com sucesso.', 'ok');
+    const idMsg = json.simulacao_id ? (' Gravada como simulação #' + json.simulacao_id + '.') : '';
+    setStatus('Simulação calculada e salva com sucesso.' + idMsg, 'ok');
+    carregarHistorico();
   } catch(err){
     setStatus('Erro ao chamar a API: ' + err.message, 'err');
   } finally {
@@ -554,7 +615,7 @@ function renderResults(json){
   };
   const knownKeys = ['dormidas','receita_total','receitaTotal','receita','custos_totais','custosTotais','gop',
     'gop_por_dormida','gopPorDormida','margem_gop','margemGop','margem_gop_pct',
-    'camareiras_necessarias','camareirasNecessarias', ...Object.keys(categoryLabels)];
+    'camareiras_necessarias','camareirasNecessarias', 'simulacao_id', ...Object.keys(categoryLabels)];
 
   for (const [key, label] of Object.entries(categoryLabels)){
     if (json[key] !== undefined && json[key] !== null){
