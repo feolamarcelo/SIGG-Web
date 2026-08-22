@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIGG · Simulador Touros</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --ink:#0F2438;
+    --paper:#FAF8F4;
+    --panel:#FFFFFF;
+    --line:#DCD5C6;
+    --teal:#1B4D4A;
+    --teal-dark:#123534;
+    --ochre:#C1872A;
+    --ok:#2F6F4E;
+    --err:#A23B2E;
+    --muted:#6B7280;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:32px 20px 80px;}
+
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    padding-bottom:20px;margin-bottom:28px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand-eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ochre);margin:0 0 6px;
+  }
+  h1{
+    font-family:var(--serif);font-weight:700;font-size:30px;margin:0;color:var(--teal-dark);
+    letter-spacing:-0.01em;
+  }
+  .subtitle{color:var(--muted);font-size:14px;margin-top:6px;max-width:480px;}
+  .tide{
+    height:3px;width:100%;margin:0 0 32px;border-radius:2px;
+    background:linear-gradient(90deg, var(--teal) 0%, var(--ochre) 55%, transparent 100%);
+  }
+
+  .step-label{
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--teal);margin-bottom:10px;display:block;
+  }
+
+  .dropzones{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+  @media (max-width:640px){.dropzones{grid-template-columns:1fr;}}
+
+  .dropzone{
+    background:var(--panel);
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    padding:22px 18px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+    position:relative;
+  }
+  .dropzone:hover{border-color:var(--teal);}
+  .dropzone.dragover{border-color:var(--ochre);background:#FFF8EC;}
+  .dropzone.filled{border-style:solid;border-color:var(--ok);background:#F3F9F5;}
+  .dropzone input{display:none;}
+  .dz-title{font-weight:600;font-size:14.5px;margin-bottom:4px;}
+  .dz-hint{font-size:12.5px;color:var(--muted);}
+  .dz-filename{
+    margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--teal-dark);
+    word-break:break-all;
+  }
+  .dz-icon{font-size:22px;margin-bottom:8px;display:block;}
+
+  .status-line{
+    font-size:13px;padding:10px 12px;border-radius:8px;margin-bottom:16px;
+    display:none;
+  }
+  .status-line.show{display:block;}
+  .status-line.err{background:#FBEAE7;color:var(--err);border:1px solid #F0C9C2;}
+  .status-line.ok{background:#EAF3EE;color:var(--ok);border:1px solid #C9E0D2;}
+
+  .premises{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:18px 20px;margin-bottom:24px;display:none;
+  }
+  .premises.show{display:block;}
+  .premises summary{
+    cursor:pointer;font-size:13px;font-weight:600;color:var(--teal-dark);
+    list-style:none;display:flex;align-items:center;gap:6px;
+  }
+  .premises summary::-webkit-details-marker{display:none;}
+  .premises summary::before{content:"▸";font-size:11px;color:var(--ochre);}
+  .premises[open] summary::before{content:"▾";}
+  .premise-grid{
+    margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;
+    font-family:var(--mono);font-size:12.5px;
+  }
+  @media (max-width:640px){.premise-grid{grid-template-columns:1fr;}}
+  .premise-grid div{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line);padding:4px 0;}
+  .premise-grid span:first-child{color:var(--muted);}
+
+  .nome-input{
+    width:100%;padding:11px 14px;margin-bottom:10px;
+    border:1px solid var(--line);border-radius:8px;
+    font-family:var(--sans);font-size:14px;color:var(--ink);
+    background:var(--panel);
+  }
+  .nome-input:focus{outline:none;border-color:var(--teal);}
+
+  .calc-btn{
+    width:100%;padding:14px;border:none;border-radius:8px;
+    background:var(--teal);color:#fff;font-size:15px;font-weight:600;
+    cursor:pointer;transition:background .15s ease;
+    font-family:var(--sans);
+  }
+  .calc-btn:hover:not(:disabled){background:var(--teal-dark);}
+  .calc-btn:disabled{background:#B7C4C3;cursor:not-allowed;}
+
+  .loading{
+    display:none;align-items:center;gap:10px;justify-content:center;
+    margin-top:14px;font-size:13px;color:var(--muted);
+  }
+  .loading.show{display:flex;}
+  .spinner{
+    width:16px;height:16px;border-radius:50%;
+    border:2px solid var(--line);border-top-color:var(--ochre);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .results{margin-top:36px;display:none;}
+  .results.show{display:block;}
+  .results-title{
+    font-family:var(--serif);font-size:20px;color:var(--teal-dark);margin:0 0 16px;
+  }
+  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+  @media (max-width:640px){.kpi-grid{grid-template-columns:1fr 1fr;}}
+  .kpi{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:16px 14px;
+  }
+  .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;}
+  .kpi-value{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--teal-dark);}
+  .kpi.highlight{border-color:var(--ochre);background:#FFF8EC;}
+  .kpi.highlight .kpi-value{color:var(--ochre);}
+  .kpi-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;}
+  .meta-boxes{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+  .meta-box{border:1px solid var(--line);border-radius:6px;padding:7px 9px;background:var(--paper);}
+  .meta-box .mb-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:5px;}
+  .mb-farol{width:6px;height:6px;border-radius:50%;display:inline-block;}
+  .mb-farol.verde{background:var(--ok);}
+  .mb-farol.amarelo{background:var(--ochre);}
+  .mb-farol.vermelho{background:var(--err);}
+  .meta-box .mb-line{font-family:var(--mono);font-size:10.5px;display:flex;justify-content:space-between;color:var(--ink);}
+  .meta-box .mb-line span:first-child{color:var(--muted);}
+  .kpi.span2{grid-column:span 2;}
+  @media (max-width:640px){.kpi.span2{grid-column:span 2;}}
+
+  details.raw{margin-top:18px;}
+  details.raw summary{cursor:pointer;font-size:12px;color:var(--muted);}
+  pre.raw-json{
+    background:var(--ink);color:#D9E6E4;padding:14px;border-radius:8px;
+    font-family:var(--mono);font-size:11.5px;overflow-x:auto;margin-top:10px;
+  }
+
+  .historico{margin-top:44px;}
+  .historico-lista{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;
+  }
+  .historico-item{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;
+  }
+  .historico-item:last-child{border-bottom:none;}
+  .historico-nome{font-weight:600;color:var(--teal-dark);}
+  .historico-periodo{color:var(--muted);font-size:12px;margin-top:2px;}
+  .historico-data{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;}
+  .historico-vazio{padding:16px;color:var(--muted);font-size:13px;text-align:center;}
+
+  footer{margin-top:48px;font-size:11.5px;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="brand-eyebrow">SIGG · Sistema Integrado de Gestão Gerencial</p>
+      <h1>Simulador — Touros</h1>
+      <p class="subtitle">Carregue o P&amp;L e o Relatório 216. Os parâmetros são extraídos automaticamente e enviados para o motor de cálculo.</p>
+    </div>
+  </header>
+  <div class="tide"></div>
+
+  <span class="step-label">1. Arquivos</span>
+  <div class="dropzones">
+    <label class="dropzone" id="dz-pnl">
+      <input type="file" id="file-pnl" accept=".xlsx,.xlsm">
+      <span class="dz-icon">📊</span>
+      <div class="dz-title">P&amp;L (custos)</div>
+      <div class="dz-hint">Filtrado no período histórico desejado (ex: Jan–Jul)</div>
+      <div class="dz-filename" id="fn-pnl"></div>
+    </label>
+    <label class="dropzone" id="dz-rel">
+      <input type="file" id="file-rel" accept=".xls,.xlsx">
+      <span class="dz-icon">🛎️</span>
+      <div class="dz-title">Relatório 216 (previsão)</div>
+      <div class="dz-hint">Forecast do mês que você quer simular</div>
+      <div class="dz-filename" id="fn-rel"></div>
+    </label>
+  </div>
+
+  <div class="status-line" id="status"></div>
+
+  <details class="premises" id="premises">
+    <summary>Ver parâmetros calculados automaticamente</summary>
+    <div class="premise-grid" id="premise-grid"></div>
+  </details>
+
+  <span class="step-label">2. Calcular e gravar</span>
+  <input type="text" id="nome-simulacao" placeholder="Nome desta simulação (ex: Agosto 2026)" class="nome-input">
+  <button class="calc-btn" id="calc-btn" disabled>Carregue os dois arquivos para calcular</button>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <span>Chamando a API… a primeira chamada do dia pode levar até 30s (a API "acorda" do plano gratuito).</span>
+  </div>
+
+  <div class="results" id="results">
+    <h2 class="results-title">Resultado da simulação</h2>
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <details class="raw">
+      <summary>Ver resposta técnica (JSON)</summary>
+      <pre class="raw-json" id="raw-json"></pre>
+    </details>
+  </div>
+
+  <div class="historico">
+    <span class="step-label">Simulações salvas</span>
+    <div id="historico-lista" class="historico-lista">
+      <div class="historico-vazio">Carregando...</div>
+    </div>
+  </div>
+
+  <footer>SIGG-Core · API em produção: sigg-core.onrender.com</footer>
+</div>
+
+<script>
+const API_URL = "https://sigg-core.onrender.com/simulacoes";
+
+let pnlData = null;
+let relData = null;
+
+function setStatus(msg, type){
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status-line show ' + (type || '');
+}
+function clearStatus(){
+  const el = document.getElementById('status');
+  el.className = 'status-line';
+}
+
+function normCell(v){
+  return (v === null || v === undefined) ? '' : v.toString().trim();
+}
+
+function findYearColumn(rows, fromIdx, toIdx){
+  // Finds the row/col holding the most recent year (2000-2100) header, returns {row, col, year}
+  let best = null;
+  for(let i=fromIdx; i<toIdx; i++){
+    const row = rows[i] || [];
+    for(let c=0;c<row.length;c++){
+      const v = row[c];
+      if (typeof v === 'number' && v>=2000 && v<=2100){
+        if (!best || v > best.year){ best = {row:i, col:c, year:v}; }
+      }
+    }
+  }
+  return best;
+}
+
+function parsePNL(workbook){
+  const sheetName = 'Receitas e custos detalhe';
+  if (!workbook.Sheets[sheetName]){
+    throw new Error('A aba "Receitas e custos detalhe" não foi encontrada no arquivo do P&L. Confira se é o arquivo certo.');
+  }
+  const ws = workbook.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+
+  const yearInfo = findYearColumn(rows, 0, rows.length);
+  if (!yearInfo) throw new Error('Não encontrei as colunas de ano (ex: 2025/2026) na aba de custos do P&L.');
+  const yearCol = yearInfo.col;
+  const headerRowIdx = yearInfo.row;
+
+  let custosRowIdx = -1;
+  for(let i=headerRowIdx+1;i<rows.length;i++){
+    if (normCell(rows[i][0]).toLowerCase() === 'custos'){ custosRowIdx = i; break; }
+  }
+  if (custosRowIdx === -1) throw new Error('Não encontrei a seção "Custos" na aba de detalhe do P&L.');
+
+  function findLabel(label, fromIdx, toIdx){
+    const target = label.trim().toLowerCase();
+    for(let i=fromIdx;i<toIdx;i++){
+      if (normCell(rows[i][0]).toLowerCase() === target){
+        const v = rows[i][yearCol];
+        return (v === null || v === undefined) ? null : Number(v);
+      }
+    }
+    return null;
+  }
+
+  const receitaLabels = ['ALIMENTACAO','BEBIDA','COMIDA','DIVERSOS'];
+  let receitaExtraTotal = 0;
+  for (const label of receitaLabels){
+    const v = findLabel(label, headerRowIdx+1, custosRowIdx);
+    if (v === null) throw new Error('Não encontrei a linha "'+label+'" na seção de receitas do P&L.');
+    receitaExtraTotal += v;
+  }
+
+  const costLabels = {
+    alimentos_total: 'COMIDAS',
+    bebidas_total: 'BEBIDAS',
+    comunicacoes_total: 'COMUNICAÇÕES',
+    energia_total: 'ENERGIA',
+    manutencao_total: 'MANUTENÇÃO',
+    operacionais_total: 'OPERACIONAIS',
+    pessoal_total: 'PESSOAL'
+  };
+  const custos = {};
+  for (const [key, label] of Object.entries(costLabels)){
+    const v = findLabel(label, custosRowIdx+1, rows.length);
+    if (v === null) throw new Error('Não encontrei a linha "'+label+'" na seção de custos do P&L.');
+    custos[key] = v;
+  }
+
+  // Dormidas do período (para ponderar) — aba USA HOTEL USALI
+  const usaliName = 'USA HOTEL USALI';
+  if (!workbook.Sheets[usaliName]) throw new Error('A aba "USA HOTEL USALI" não foi encontrada no arquivo do P&L.');
+  const wsU = workbook.Sheets[usaliName];
+  const rowsU = XLSX.utils.sheet_to_json(wsU, {header:1, raw:true, defval:null});
+  const yearInfoU = findYearColumn(rowsU, 0, rowsU.length);
+  if (!yearInfoU) throw new Error('Não encontrei as colunas de ano na aba "USA HOTEL USALI".');
+  let dormidas = null;
+  for (let i=0;i<rowsU.length;i++){
+    if (normCell(rowsU[i][0]).toLowerCase() === 'dormidas'){
+      dormidas = Number(rowsU[i][yearInfoU.col]);
+      break;
+    }
+  }
+  if (dormidas === null || !dormidas) throw new Error('Não encontrei a linha "Dormidas" na aba "USA HOTEL USALI".');
+
+  return {
+    dormidas_periodo_custos: dormidas,
+    alimentos_por_dormida: custos.alimentos_total / dormidas,
+    bebidas_por_dormida: custos.bebidas_total / dormidas,
+    comunicacoes_por_dormida: custos.comunicacoes_total / dormidas,
+    energia_por_dormida: custos.energia_total / dormidas,
+    manutencao_por_dormida: custos.manutencao_total / dormidas,
+    operacionais_por_dormida: custos.operacionais_total / dormidas,
+    pessoal_por_dormida: custos.pessoal_total / dormidas,
+    receita_extra_por_dormida: receitaExtraTotal / dormidas
+  };
+}
+
+function parseRelatorio216(workbook){
+  let sheetName = workbook.SheetNames.find(n => n.toLowerCase().includes('relat'));
+  if (!sheetName) sheetName = workbook.SheetNames[0];
+  const ws = workbook.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+
+  let headerIdx = -1;
+  let colMap = {};
+  for (let i=0;i<rows.length;i++){
+    const norm = (rows[i]||[]).map(v => normCell(v).toLowerCase());
+    if (norm.includes('quartos') && norm.includes('receita') && norm.includes('adultos')){
+      headerIdx = i;
+      norm.forEach((v,c) => { if (v) colMap[v] = c; });
+      break;
+    }
+  }
+  if (headerIdx === -1) throw new Error('Não reconheci o layout do Relatório 216 (colunas "Quartos"/"Receita"/"Adultos" não encontradas).');
+
+  let quartosSum=0, criancasSum=0, adultosSum=0, receitaSum=0, dias=0;
+  for (let i=headerIdx+1; i<rows.length; i++){
+    const row = rows[i] || [];
+    if (normCell(row[0]) !== ''){
+      break; // linha de "Media"/"Total"
+    }
+    const quartos = row[colMap['quartos']];
+    if (quartos === null || quartos === '' || quartos === undefined) continue;
+    quartosSum += Number(quartos);
+    criancasSum += Number(row[colMap['criancas']] || 0);
+    adultosSum += Number(row[colMap['adultos']] || 0);
+    receitaSum += Number(row[colMap['receita']] || 0);
+    dias++;
+  }
+  if (dias === 0) throw new Error('Não encontrei linhas diárias no Relatório 216.');
+
+  return {
+    uh_ocupadas: quartosSum,
+    dormidas: criancasSum + adultosSum,
+    receita_hospedagem_total: receitaSum,
+    adr: receitaSum / quartosSum,
+    dias_periodo: dias
+  };
+}
+
+function readWorkbook(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try{
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, {type:'array', cellDates:false});
+        resolve(wb);
+      } catch(err){ reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Falha ao ler o arquivo.'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function fmtBRL(v){
+  return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+function fmtNum(v, decimals){
+  return v.toLocaleString('pt-BR', {minimumFractionDigits:decimals||0, maximumFractionDigits:decimals||2});
+}
+
+function renderPremises(){
+  if (!pnlData || !relData) return;
+  const grid = document.getElementById('premise-grid');
+  const rows = [
+    ['Dormidas (previsão)', fmtNum(relData.dormidas)],
+    ['UH ocupadas (previsão)', fmtNum(relData.uh_ocupadas)],
+    ['Receita hospedagem total', fmtBRL(relData.receita_hospedagem_total)],
+    ['ADR previsto', fmtBRL(relData.adr)],
+    ['Dias do período simulado', fmtNum(relData.dias_periodo)],
+    ['— custos ponderados (R$/dormida) —', ''],
+    ['Alimentos', fmtBRL(pnlData.alimentos_por_dormida)],
+    ['Bebidas', fmtBRL(pnlData.bebidas_por_dormida)],
+    ['Comunicações', fmtBRL(pnlData.comunicacoes_por_dormida)],
+    ['Energia', fmtBRL(pnlData.energia_por_dormida)],
+    ['Manutenção', fmtBRL(pnlData.manutencao_por_dormida)],
+    ['Operacionais', fmtBRL(pnlData.operacionais_por_dormida)],
+    ['Pessoal', fmtBRL(pnlData.pessoal_por_dormida)],
+    ['Receita extra', fmtBRL(pnlData.receita_extra_por_dormida)],
+    ['Dormidas usadas na ponderação (P&L)', fmtNum(pnlData.dormidas_periodo_custos)],
+    ['Produtividade governança (fixo)', '20 UH/camareira/dia'],
+  ];
+  grid.innerHTML = rows.map(([k,v]) => `<div><span>${k}</span><strong>${v}</strong></div>`).join('');
+  document.getElementById('premises').classList.add('show');
+}
+
+function checkReady(){
+  const btn = document.getElementById('calc-btn');
+  if (pnlData && relData){
+    btn.disabled = false;
+    btn.textContent = 'Calcular simulação';
+  } else {
+    btn.disabled = true;
+    btn.textContent = 'Carregue os dois arquivos para calcular';
+  }
+}
+
+async function handleFile(kind, file){
+  const dz = document.getElementById(kind === 'pnl' ? 'dz-pnl' : 'dz-rel');
+  const fn = document.getElementById(kind === 'pnl' ? 'fn-pnl' : 'fn-rel');
+  fn.textContent = file.name;
+  clearStatus();
+  try{
+    const wb = await readWorkbook(file);
+    if (kind === 'pnl'){
+      pnlData = parsePNL(wb);
+    } else {
+      relData = parseRelatorio216(wb);
+    }
+    dz.classList.add('filled');
+    renderPremises();
+    checkReady();
+  } catch(err){
+    dz.classList.remove('filled');
+    if (kind === 'pnl') pnlData = null; else relData = null;
+    setStatus('Erro ao ler ' + (kind === 'pnl' ? 'o P&L' : 'o Relatório 216') + ': ' + err.message, 'err');
+    checkReady();
+  }
+}
+
+['pnl','rel'].forEach(kind => {
+  const dz = document.getElementById('dz-' + kind);
+  const input = document.getElementById('file-' + kind);
+  input.addEventListener('change', (e) => {
+    if (e.target.files[0]) handleFile(kind, e.target.files[0]);
+  });
+  dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) handleFile(kind, e.dataTransfer.files[0]);
+  });
+});
+
+async function carregarHistorico(){
+  const el = document.getElementById('historico-lista');
+  try{
+    const resp = await fetch('https://sigg-core.onrender.com/simulacoes');
+    const lista = await resp.json();
+    if (!Array.isArray(lista) || lista.length === 0){
+      el.innerHTML = '<div class="historico-vazio">Nenhuma simulação salva ainda.</div>';
+      return;
+    }
+    el.innerHTML = lista.map(s => {
+      const data = s.data_criacao ? new Date(s.data_criacao).toLocaleString('pt-BR') : '';
+      const periodo = (s.periodo_inicio || s.periodo_fim)
+        ? `${s.periodo_inicio || '?'} → ${s.periodo_fim || '?'}` : '';
+      return `<div class="historico-item">
+        <div>
+          <div class="historico-nome">#${s.id} — ${s.nome || 'Sem nome'}</div>
+          ${periodo ? `<div class="historico-periodo">${periodo}</div>` : ''}
+        </div>
+        <div class="historico-data">${data}</div>
+      </div>`;
+    }).join('');
+  } catch(err){
+    el.innerHTML = '<div class="historico-vazio">Não foi possível carregar o histórico agora.</div>';
+  }
+}
+carregarHistorico();
+
+document.getElementById('calc-btn').addEventListener('click', async () => {
+  if (!pnlData || !relData) return;
+  clearStatus();
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('calc-btn').disabled = true;
+  document.getElementById('loading').classList.add('show');
+
+  const payload = {
+    dormidas: relData.dormidas,
+    alimentos_por_dormida: pnlData.alimentos_por_dormida,
+    bebidas_por_dormida: pnlData.bebidas_por_dormida,
+    comunicacoes_por_dormida: pnlData.comunicacoes_por_dormida,
+    energia_por_dormida: pnlData.energia_por_dormida,
+    operacionais_por_dormida: pnlData.operacionais_por_dormida,
+    manutencao_por_dormida: pnlData.manutencao_por_dormida,
+    pessoal_por_dormida: pnlData.pessoal_por_dormida,
+    receita_hospedagem_total: relData.receita_hospedagem_total,
+    receita_extra_por_dormida: pnlData.receita_extra_por_dormida,
+    uh_ocupadas: relData.uh_ocupadas,
+    dias_periodo: relData.dias_periodo,
+    produtividade_governanca: 20,
+    nome: document.getElementById('nome-simulacao').value.trim() || undefined
+  };
+
+  try{
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const json = await resp.json();
+    if (!resp.ok){
+      throw new Error(json.erro || ('A API respondeu com erro ' + resp.status));
+    }
+    renderResults(json);
+    const idMsg = json.simulacao_id ? (' Gravada como simulação #' + json.simulacao_id + '.') : '';
+    setStatus('Simulação calculada e salva com sucesso.' + idMsg, 'ok');
+    carregarHistorico();
+  } catch(err){
+    setStatus('Erro ao chamar a API: ' + err.message, 'err');
+  } finally {
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('calc-btn').disabled = false;
+  }
+});
+
+// Metas calculadas a partir do P&L (31 meses fechados, Jan/2024-Jul/2026).
+// Grupo = melhor mês / média entre os 6 Resorts do grupo (Touros, Cumbuco, Alagoas, Mares, Cabo, Angra).
+// Historico = melhor mês / média do próprio Touros.
+const BENCHMARKS = {
+  rubricas: {
+    alimentos:     {dirMeta:80.00, grupo:{meta:38.31, media:75.56}, hist:{meta:38.31, media:71.66}},
+    bebidas:       {dirMeta:15.00, grupo:{meta:11.93, media:24.47}, hist:{meta:15.29, media:25.59}},
+    comunicacoes:  {grupo:{meta:0.02,  media:0.58},  hist:{meta:0.45,  media:1.23}},
+    energia:       {grupo:{meta:4.38,  media:24.99}, hist:{meta:10.37, media:19.60}},
+    manutencao:    {grupo:{meta:5.67,  media:22.53}, hist:{meta:7.08,  media:25.60}},
+    operacionais:  {grupo:{meta:20.80, media:58.45}, hist:{meta:27.75, media:57.33}},
+    pessoal:       {grupo:{meta:24.24, media:87.22}, hist:{meta:37.76, media:90.42}},
+  },
+  resultado: {
+    gopPct:            {grupo:{meta:66.67,   media:39.47},   hist:{meta:66.67,   media:40.04}},
+    receitaPorDormida: {grupo:{meta:664.31,  media:485.12},  hist:{meta:648.92,  media:486.03}},
+  }
+};
+
+function statusCusto(real, ref){
+  if(real <= ref.meta) return "verde";
+  if(real <= ref.media) return "amarelo";
+  return "vermelho";
+}
+function statusResultado(real, ref){
+  if(real >= ref.meta) return "verde";
+  if(real >= ref.media) return "amarelo";
+  return "vermelho";
+}
+function metaBoxHtml(label, status, meta, media, isPct){
+  const f = v => isPct ? (v.toFixed(2).replace('.',',') + '%') : fmtBRL(v);
+  return `<div class="meta-box">
+    <div class="mb-label"><span class="mb-farol ${status}"></span>${label}</div>
+    <div class="mb-line"><span>meta</span><span>${f(meta)}</span></div>
+    <div class="mb-line"><span>média</span><span>${f(media)}</span></div>
+  </div>`;
+}
+function metaBoxesHtml(real, bench, isPct){
+  const stGrupo = isPct ? statusResultado(real, bench.grupo) : statusCusto(real, bench.grupo);
+  const stHist  = isPct ? statusResultado(real, bench.hist)  : statusCusto(real, bench.hist);
+  return `<div class="meta-boxes">
+    ${metaBoxHtml('Grupo Resorts', stGrupo, bench.grupo.meta, bench.grupo.media, isPct)}
+    ${metaBoxHtml('Histórico Touros', stHist, bench.hist.meta, bench.hist.media, isPct)}
+  </div>`;
+}
+
+function pick(obj, keys){
+  for (const k of keys){
+    if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+  }
+  return null;
+}
+
+function renderResults(json){
+  const kpiGrid = document.getElementById('kpi-grid');
+  const cardsHtml = [];
+
+  const dormidas = pick(json, ['dormidas']);
+  const receitaTotal = pick(json, ['receita_total','receitaTotal','receita']);
+  const custosTotais = pick(json, ['custos_totais','custosTotais']);
+  const gop = pick(json, ['gop']);
+  const gopPorDormida = pick(json, ['gop_por_dormida','gopPorDormida']);
+  const margemGop = pick(json, ['margem_gop','margemGop','margem_gop_pct']);
+  const camareiras = pick(json, ['camareiras_necessarias','camareirasNecessarias']);
+
+  function card(label, value, hl, subHtml, span2){
+    return `<div class="kpi${hl ? ' highlight' : ''}${span2 ? ' span2' : ''}">
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value">${value}</div>
+      ${subHtml || ''}
+    </div>`;
+  }
+
+  if (dormidas !== null) cardsHtml.push(card('Dormidas', fmtNum(dormidas), false));
+  if (receitaTotal !== null) cardsHtml.push(card('Receita Total', fmtBRL(receitaTotal), false));
+  if (custosTotais !== null) cardsHtml.push(card('Custos Totais', fmtBRL(custosTotais), false));
+  if (gop !== null) cardsHtml.push(card('GOP', fmtBRL(gop), true));
+  if (gopPorDormida !== null) cardsHtml.push(card('GOP por Dormida', fmtBRL(gopPorDormida), false));
+
+  if (margemGop !== null){
+    const pct = margemGop <= 1 ? margemGop * 100 : margemGop;
+    cardsHtml.push(card('Margem GOP', fmtNum(pct, 2) + '%', true, metaBoxesHtml(pct, BENCHMARKS.resultado.gopPct, true), true));
+  }
+  if (receitaTotal !== null && dormidas){
+    const rd = receitaTotal / dormidas;
+    cardsHtml.push(card('Receita / Dormida', fmtBRL(rd), false, metaBoxesHtml(rd, BENCHMARKS.resultado.receitaPorDormida, true), true));
+  }
+  if (camareiras !== null) cardsHtml.push(card('Camareiras necessárias/dia', fmtNum(camareiras, 0), true));
+
+  // Detalhamento de custos por rubrica — agora com R$/dormida e faróis (Grupo Resorts / Histórico Touros).
+  const categoryLabels = {
+    alimentos: 'Alimentos',
+    bebidas: 'Bebidas',
+    comunicacoes: 'Comunicações',
+    energia: 'Energia',
+    manutencao: 'Manutenção',
+    operacionais: 'Operacionais',
+    pessoal: 'Pessoal'
+  };
+  const knownKeys = ['dormidas','receita_total','receitaTotal','receita','custos_totais','custosTotais','gop',
+    'gop_por_dormida','gopPorDormida','margem_gop','margemGop','margem_gop_pct',
+    'camareiras_necessarias','camareirasNecessarias', 'simulacao_id', ...Object.keys(categoryLabels)];
+
+  for (const [key, label] of Object.entries(categoryLabels)){
+    if (json[key] !== undefined && json[key] !== null){
+      const total = Number(json[key]);
+      const bench = BENCHMARKS.rubricas[key];
+      let sub = '';
+      let valueStr = fmtBRL(total) + ' (total do mês)';
+      if (dormidas && bench){
+        const perDormida = total / dormidas;
+        valueStr = fmtBRL(perDormida) + ' <span class="kpi-sub" style="display:inline;">/dormida</span>';
+        sub = metaBoxesHtml(perDormida, bench, false);
+        if (bench.dirMeta){
+          sub += `<div class="kpi-sub">🎯 meta oficial Direção: ${fmtBRL(bench.dirMeta)}</div>`;
+        }
+      }
+      cardsHtml.push(card(label, valueStr, false, sub, true));
+    }
+  }
+
+  // Qualquer outra chave não prevista acima também é mostrada, para não esconder nada.
+  for (const [k,v] of Object.entries(json)){
+    if (!knownKeys.includes(k) && typeof v !== 'object'){
+      cardsHtml.push(card(k, v, false));
+    }
+  }
+
+  kpiGrid.innerHTML = cardsHtml.join('');
+
+  document.getElementById('raw-json').textContent = JSON.stringify(json, null, 2);
+  document.getElementById('results').classList.add('show');
+}
+</script>
+</body>
+</html>
