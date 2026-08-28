@@ -30,7 +30,6 @@
     line-height:1.5;
   }
   .wrap{max-width:880px;margin:0 auto;padding:32px 20px 80px;}
-
   header{
     display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
     padding-bottom:20px;margin-bottom:28px;
@@ -49,15 +48,12 @@
     height:3px;width:100%;margin:0 0 32px;border-radius:2px;
     background:linear-gradient(90deg, var(--teal) 0%, var(--ochre) 55%, transparent 100%);
   }
-
   .step-label{
     font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
     color:var(--teal);margin-bottom:10px;display:block;
   }
-
   .dropzones{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
   @media (max-width:640px){.dropzones{grid-template-columns:1fr;}}
-
   .dropzone{
     background:var(--panel);
     border:1.5px dashed var(--line);
@@ -79,7 +75,6 @@
     word-break:break-all;
   }
   .dz-icon{font-size:22px;margin-bottom:8px;display:block;}
-
   .status-line{
     font-size:13px;padding:10px 12px;border-radius:8px;margin-bottom:16px;
     display:none;
@@ -87,7 +82,6 @@
   .status-line.show{display:block;}
   .status-line.err{background:#FBEAE7;color:var(--err);border:1px solid #F0C9C2;}
   .status-line.ok{background:#EAF3EE;color:var(--ok);border:1px solid #C9E0D2;}
-
   .premises{
     background:var(--panel);border:1px solid var(--line);border-radius:10px;
     padding:18px 20px;margin-bottom:24px;display:none;
@@ -107,7 +101,6 @@
   @media (max-width:640px){.premise-grid{grid-template-columns:1fr;}}
   .premise-grid div{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line);padding:4px 0;}
   .premise-grid span:first-child{color:var(--muted);}
-
   .nome-input{
     width:100%;padding:11px 14px;margin-bottom:10px;
     border:1px solid var(--line);border-radius:8px;
@@ -115,7 +108,6 @@
     background:var(--panel);
   }
   .nome-input:focus{outline:none;border-color:var(--teal);}
-
   .calc-btn{
     width:100%;padding:14px;border:none;border-radius:8px;
     background:var(--teal);color:#fff;font-size:15px;font-weight:600;
@@ -124,7 +116,6 @@
   }
   .calc-btn:hover:not(:disabled){background:var(--teal-dark);}
   .calc-btn:disabled{background:#B7C4C3;cursor:not-allowed;}
-
   .loading{
     display:none;align-items:center;gap:10px;justify-content:center;
     margin-top:14px;font-size:13px;color:var(--muted);
@@ -136,7 +127,6 @@
     animation:spin .8s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg);}}
-
   .results{margin-top:36px;display:none;}
   .results.show{display:block;}
   .results-title{
@@ -164,14 +154,12 @@
   .meta-box .mb-line span:first-child{color:var(--muted);}
   .kpi.span2{grid-column:span 2;}
   @media (max-width:640px){.kpi.span2{grid-column:span 2;}}
-
   details.raw{margin-top:18px;}
   details.raw summary{cursor:pointer;font-size:12px;color:var(--muted);}
   pre.raw-json{
     background:var(--ink);color:#D9E6E4;padding:14px;border-radius:8px;
     font-family:var(--mono);font-size:11.5px;overflow-x:auto;margin-top:10px;
   }
-
   .historico{margin-top:44px;}
   .historico-lista{
     background:var(--panel);border:1px solid var(--line);border-radius:10px;
@@ -186,7 +174,6 @@
   .historico-periodo{color:var(--muted);font-size:12px;margin-top:2px;}
   .historico-data{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap;}
   .historico-vazio{padding:16px;color:var(--muted);font-size:13px;text-align:center;}
-
   footer{margin-top:48px;font-size:11.5px;color:var(--muted);text-align:center;}
   .periodo-custos{margin:18px 0 6px;padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:#FBF8F1;}
   .periodo-selects{display:flex;gap:16px;flex-wrap:wrap;}
@@ -199,7 +186,6 @@
 </head>
 <body>
 <div class="wrap">
-
   <header>
     <div>
       <p class="brand-eyebrow">SIGG · Sistema Integrado de Gestão Gerencial</p>
@@ -208,7 +194,6 @@
     </div>
   </header>
   <div class="tide"></div>
-
   <span class="step-label">1. Arquivos</span>
   <div class="dropzones">
     <label class="dropzone" id="dz-pnl">
@@ -226,7 +211,6 @@
       <div class="dz-filename" id="fn-rel"></div>
     </label>
   </div>
-
   <div class="periodo-custos" id="periodo-custos" style="display:none;">
     <span class="step-label" style="margin-top:0;">Período de custos (base ponderada)</span>
     <p class="dz-hint" style="margin-bottom:10px;">Seu P&amp;L agora traz vários meses e hotéis juntos. Escolha aqui qual período usar como base ponderada (ex: Jan–Jul/2026) — não precisa mais filtrar isso no Excel.</p>
@@ -235,14 +219,11 @@
       <label>Até <select id="periodo-ate"></select></label>
     </div>
   </div>
-
   <div class="status-line" id="status"></div>
-
   <details class="premises" id="premises">
     <summary>Ver parâmetros calculados automaticamente</summary>
     <div class="premise-grid" id="premise-grid"></div>
   </details>
-
   <span class="step-label">2. Calcular e gravar</span>
   <input type="text" id="nome-simulacao" placeholder="Nome desta simulação (ex: Agosto 2026)" class="nome-input">
   <button class="calc-btn" id="calc-btn" disabled>Carregue os dois arquivos para calcular</button>
@@ -250,7 +231,6 @@
     <div class="spinner"></div>
     <span>Chamando a API… a primeira chamada do dia pode levar até 30s (a API "acorda" do plano gratuito).</span>
   </div>
-
   <div class="results" id="results">
     <h2 class="results-title">Resultado da simulação</h2>
     <div class="kpi-grid" id="kpi-grid"></div>
@@ -259,23 +239,18 @@
       <pre class="raw-json" id="raw-json"></pre>
     </details>
   </div>
-
   <div class="historico">
     <span class="step-label">Simulações salvas</span>
     <div id="historico-lista" class="historico-lista">
       <div class="historico-vazio">Carregando...</div>
     </div>
   </div>
-
   <footer>SIGG-Core · API em produção: sigg-core.onrender.com</footer>
 </div>
-
 <script>
 const API_URL = "https://sigg-core.onrender.com/simulacoes";
-
 let pnlData = null;
 let relData = null;
-
 function setStatus(msg, type){
   const el = document.getElementById('status');
   el.textContent = msg;
@@ -285,17 +260,13 @@ function clearStatus(){
   const el = document.getElementById('status');
   el.className = 'status-line';
 }
-
 function normCell(v){
   return (v === null || v === undefined) ? '' : v.toString().trim();
 }
-
 const KNOWN_HOTELS = ['TOUROS','CUMBUCO','ALAGOAS','MARES','CABO','ECO RESORT DE ANGRA','FORTALEZA','SALVADOR',
   'RIO DE JANEIRO','PAULISTA','COLLECTION OURO PRETO','COLLECTION SUNSET CUMBUCO','COLLECTION AMAZÔNIA',
   'VG CUMBUCO SUN','VG CUMBUCO LOTES','CUMBUCO VILLAGE LTDA','SANTA VITÓRIA BRASIL FOR','SANTA VITÓRIA BRASIL RIO','TOTAL GERAL'];
-
 const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-
 function findYearColumn(rows, fromIdx, toIdx){
   // Formato antigo (uma única coluna de ano). Mantido para compatibilidade retroativa.
   let best = null;
@@ -310,11 +281,6 @@ function findYearColumn(rows, fromIdx, toIdx){
   }
   return best;
 }
-
-// Detecta colunas de (ano,mês) num par de linhas de cabeçalho adjacentes, em qualquer
-// ordem (ano em cima/mês embaixo, ou mês em cima/ano embaixo). Ignora colunas de
-// subtotal ("2025 Total" etc.) porque essas ficam em branco na linha "densa" (a que
-// tem um valor explícito em toda coluna real).
 function detectYearMonthCols(rows, maxScanRows){
   maxScanRows = Math.min(maxScanRows || 20, rows.length - 1);
   let maxCols = 0;
@@ -332,13 +298,9 @@ function detectYearMonthCols(rows, maxScanRows){
       if (typeof b === 'number' && b>=2000 && b<=2100) bYearHits++;
     }
     let monthRow=null, yearRow=null, monthHits=0, yearHits=0;
-    // Tenta as duas orientações (A=mês/B=ano, ou A=ano/B=mês) e fica com a que bate.
     if (aMonthHits>=8 && bYearHits>=3){ monthRow=r; yearRow=r+1; monthHits=aMonthHits; yearHits=bYearHits; }
     else if (bMonthHits>=8 && aYearHits>=3){ monthRow=r+1; yearRow=r; monthHits=bMonthHits; yearHits=aYearHits; }
     if (monthRow===null) continue;
-    // A linha com MAIS valores explícitos é a "densa" (tem um valor em toda coluna real);
-    // essa é usada como porta de entrada (gate) direta. A outra é esparsa e precisa de
-    // preenchimento à direita (forward-fill), repetindo o último valor visto.
     const denseIsMonth = monthHits >= yearHits;
     const cols = [];
     let lastMonth=null, lastYear=null;
@@ -348,12 +310,10 @@ function detectYearMonthCols(rows, maxScanRows){
       if (typeof mvRaw === 'number' && mvRaw>=1 && mvRaw<=12) lastMonth = mvRaw;
       if (typeof yvRaw === 'number' && yvRaw>=2000 && yvRaw<=2100) lastYear = yvRaw;
       if (denseIsMonth){
-        // mês é a porta (precisa ser explícito nesta coluna); ano é preenchido à direita
         if (typeof mvRaw === 'number' && mvRaw>=1 && mvRaw<=12 && lastYear){
           cols.push({col:c, year:lastYear, month:mvRaw});
         }
       } else {
-        // ano é a porta (precisa ser explícito nesta coluna); mês é preenchido à direita
         if (typeof yvRaw === 'number' && yvRaw>=2000 && yvRaw<=2100 && lastMonth){
           cols.push({col:c, year:yvRaw, month:lastMonth});
         }
@@ -363,7 +323,6 @@ function detectYearMonthCols(rows, maxScanRows){
   }
   return null;
 }
-
 function findHotelBlock(rows, hotelName, fromRow){
   const target = hotelName.trim().toUpperCase();
   let start=-1;
@@ -378,7 +337,6 @@ function findHotelBlock(rows, hotelName, fromRow){
   }
   return {start, end};
 }
-
 function sumRowAcrossCols(row, cols){
   let s = 0, any = false;
   for (const {col} of cols){
@@ -387,10 +345,7 @@ function sumRowAcrossCols(row, cols){
   }
   return any ? s : null;
 }
-
 function colKey(year, month){ return year*12 + month; }
-
-// ---- Fase 1: escaneia o workbook e monta a estrutura bruta (sem somar ainda) ----
 function scanPNL(workbook){
   const sheetName = 'Receitas e custos detalhe';
   if (!workbook.Sheets[sheetName]){
@@ -398,9 +353,7 @@ function scanPNL(workbook){
   }
   const ws = workbook.Sheets[sheetName];
   const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
-
   const det = detectYearMonthCols(rows);
-
   const usaliSheetName = "KPI's Hotel";
   if (!workbook.Sheets[usaliSheetName]){
     throw new Error('A aba "KPI\'s Hotel" não foi encontrada no arquivo do P&L (usada para ler Dormidas).');
@@ -408,9 +361,7 @@ function scanPNL(workbook){
   const wsD = workbook.Sheets[usaliSheetName];
   const rowsD = XLSX.utils.sheet_to_json(wsD, {header:1, raw:true, defval:null});
   const detD = detectYearMonthCols(rowsD);
-
   if (det && det.cols.length >= 6){
-    // Formato novo: vários hotéis/meses/anos juntos. Localiza o bloco do TOUROS em cada aba.
     const block = findHotelBlock(rows, 'TOUROS', det.headerEndRow+1);
     if (!block) throw new Error('Não encontrei o bloco "TOUROS" na aba de custos do P&L. Confira se o hotel TOUROS está incluído no filtro da tabela dinâmica.');
     let custosRowIdx = -1;
@@ -418,7 +369,6 @@ function scanPNL(workbook){
       if (normCell(rows[i][0]).toLowerCase()==='custos'){ custosRowIdx = i; break; }
     }
     if (custosRowIdx === -1) throw new Error('Não encontrei a seção "Custos" dentro do bloco do TOUROS.');
-
     const blockD = detD ? findHotelBlock(rowsD, 'TOUROS', detD.headerEndRow+1) : null;
     if (!blockD) throw new Error('Não encontrei o bloco "TOUROS" na aba "KPI\'s Hotel" (Dormidas).');
     let dormRowIdx = -1;
@@ -426,13 +376,10 @@ function scanPNL(workbook){
       if (normCell(rowsD[i][0]).toLowerCase()==='dormidas'){ dormRowIdx = i; break; }
     }
     if (dormRowIdx === -1) throw new Error('Não encontrei a linha "Dormidas" dentro do bloco do TOUROS na aba "KPI\'s Hotel".');
-
-    // Período disponível = interseção dos meses presentes nas duas abas.
     const availKeys = new Set(det.cols.map(c => colKey(c.year,c.month)));
     const availCols = detD.cols.filter(c => availKeys.has(colKey(c.year,c.month)))
       .map(c => ({year:c.year, month:c.month}))
       .sort((a,b)=> colKey(a.year,a.month)-colKey(b.year,b.month));
-
     return {
       formato: 'multi',
       rows, det, block, custosRowIdx,
@@ -440,14 +387,10 @@ function scanPNL(workbook){
       availCols
     };
   }
-
-  // ---- Formato antigo (retrocompatível): uma única coluna de ano, um hotel só ----
   const yearInfo = findYearColumn(rows, 0, rows.length);
   if (!yearInfo) throw new Error('Não encontrei as colunas de ano (ex: 2025/2026) na aba de custos do P&L.');
   return { formato: 'single', rows, yearInfo, workbookRef: workbook };
 }
-
-// ---- Fase 2: soma dentro do período escolhido (ou usa a coluna única, no formato antigo) ----
 function computePNL(scan, periodo){
   const receitaLabels = ['ALIMENTACAO','BEBIDA','COMIDA','DIVERSOS'];
   const costLabels = {
@@ -455,9 +398,7 @@ function computePNL(scan, periodo){
     energia_total: 'ENERGIA', manutencao_total: 'MANUTENÇÃO', operacionais_total: 'OPERACIONAIS',
     pessoal_total: 'PESSOAL'
   };
-
   let receitaExtraTotal, custos = {}, dormidas;
-
   if (scan.formato === 'single'){
     const { rows, yearInfo } = scan;
     const yearCol = yearInfo.col, headerRowIdx = yearInfo.row;
@@ -487,7 +428,6 @@ function computePNL(scan, periodo){
       if (v === null) throw new Error('Não encontrei a linha "'+label+'" na seção de custos do P&L.');
       custos[key] = v;
     }
-
     const usaliName = 'USA HOTEL USALI';
     if (!scan.workbookRef || !scan.workbookRef.Sheets[usaliName]){
       throw new Error('A aba "USA HOTEL USALI" não foi encontrada no arquivo do P&L.');
@@ -504,7 +444,6 @@ function computePNL(scan, periodo){
     }
     if (!dormidas) throw new Error('Não encontrei a linha "Dormidas" na aba "USA HOTEL USALI".');
   } else {
-    // formato multi — soma só as colunas dentro do período [de, até] escolhido
     const { rows, det, block, custosRowIdx, rowsD, detD, blockD, dormRowIdx } = scan;
     const fromKey = colKey(periodo.deAno, periodo.deMes);
     const toKey = colKey(periodo.ateAno, periodo.ateMes);
@@ -513,7 +452,6 @@ function computePNL(scan, periodo){
       return k >= fromKey && k <= toKey;
     });
     if (colsInRange.length === 0) throw new Error('O período selecionado não tem nenhum mês disponível nesta planilha.');
-
     function findLabelSum(label, fromIdx, toIdx){
       const target = label.trim().toLowerCase();
       for (let i=fromIdx;i<toIdx;i++){
@@ -541,7 +479,6 @@ function computePNL(scan, periodo){
     dormidas = sumRowAcrossCols(rowsD[dormRowIdx], colsInRangeD);
     if (!dormidas) throw new Error('Não encontrei Dormidas para o período selecionado.');
   }
-
   return {
     dormidas_periodo_custos: dormidas,
     alimentos_por_dormida: custos.alimentos_total / dormidas,
@@ -554,13 +491,11 @@ function computePNL(scan, periodo){
     receita_extra_por_dormida: receitaExtraTotal / dormidas
   };
 }
-
 function parseRelatorio216(workbook){
   let sheetName = workbook.SheetNames.find(n => n.toLowerCase().includes('relat'));
   if (!sheetName) sheetName = workbook.SheetNames[0];
   const ws = workbook.Sheets[sheetName];
   const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
-
   let headerIdx = -1;
   let colMap = {};
   for (let i=0;i<rows.length;i++){
@@ -572,12 +507,11 @@ function parseRelatorio216(workbook){
     }
   }
   if (headerIdx === -1) throw new Error('Não reconheci o layout do Relatório 216 (colunas "Quartos"/"Receita"/"Adultos" não encontradas).');
-
   let quartosSum=0, criancasSum=0, adultosSum=0, receitaSum=0, dias=0;
   for (let i=headerIdx+1; i<rows.length; i++){
     const row = rows[i] || [];
     if (normCell(row[0]) !== ''){
-      break; // linha de "Media"/"Total"
+      break;
     }
     const quartos = row[colMap['quartos']];
     if (quartos === null || quartos === '' || quartos === undefined) continue;
@@ -588,7 +522,6 @@ function parseRelatorio216(workbook){
     dias++;
   }
   if (dias === 0) throw new Error('Não encontrei linhas diárias no Relatório 216.');
-
   return {
     uh_ocupadas: quartosSum,
     dormidas: criancasSum + adultosSum,
@@ -597,7 +530,6 @@ function parseRelatorio216(workbook){
     dias_periodo: dias
   };
 }
-
 function readWorkbook(file){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -612,14 +544,12 @@ function readWorkbook(file){
     reader.readAsArrayBuffer(file);
   });
 }
-
 function fmtBRL(v){
   return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
 }
 function fmtNum(v, decimals){
   return v.toLocaleString('pt-BR', {minimumFractionDigits:decimals||0, maximumFractionDigits:decimals||2});
 }
-
 function renderPremises(){
   if (!pnlData || !relData) return;
   const grid = document.getElementById('premise-grid');
@@ -644,7 +574,6 @@ function renderPremises(){
   grid.innerHTML = rows.map(([k,v]) => `<div><span>${k}</span><strong>${v}</strong></div>`).join('');
   document.getElementById('premises').classList.add('show');
 }
-
 function checkReady(){
   const btn = document.getElementById('calc-btn');
   if (pnlData && relData){
@@ -655,10 +584,8 @@ function checkReady(){
     btn.textContent = 'Carregue os dois arquivos para calcular';
   }
 }
-
 let pnlScan = null;
 let pnlPeriodo = null;
-
 function popularPeriodoSelects(availCols){
   const selDe = document.getElementById('periodo-de');
   const selAte = document.getElementById('periodo-ate');
@@ -670,7 +597,6 @@ function popularPeriodoSelects(availCols){
   selAte.value = availCols.length - 1;
   document.getElementById('periodo-custos').style.display = 'block';
 }
-
 function periodoAtual(){
   const availCols = pnlScan.availCols;
   const iDe = Number(document.getElementById('periodo-de').value);
@@ -678,7 +604,6 @@ function periodoAtual(){
   const de = availCols[iDe], ate = availCols[iAte];
   return { deAno: de.year, deMes: de.month, ateAno: ate.year, ateMes: ate.month };
 }
-
 function recomputePNL(){
   try{
     pnlPeriodo = periodoAtual();
@@ -694,10 +619,8 @@ function recomputePNL(){
     checkReady();
   }
 }
-
 document.getElementById('periodo-de').addEventListener('change', recomputePNL);
 document.getElementById('periodo-ate').addEventListener('change', recomputePNL);
-
 async function handleFile(kind, file){
   const dz = document.getElementById(kind === 'pnl' ? 'dz-pnl' : 'dz-rel');
   const fn = document.getElementById(kind === 'pnl' ? 'fn-pnl' : 'fn-rel');
@@ -729,7 +652,6 @@ async function handleFile(kind, file){
     checkReady();
   }
 }
-
 ['pnl','rel'].forEach(kind => {
   const dz = document.getElementById('dz-' + kind);
   const input = document.getElementById('file-' + kind);
@@ -744,7 +666,6 @@ async function handleFile(kind, file){
     if (e.dataTransfer.files[0]) handleFile(kind, e.dataTransfer.files[0]);
   });
 });
-
 async function carregarHistorico(){
   const el = document.getElementById('historico-lista');
   try{
@@ -771,14 +692,13 @@ async function carregarHistorico(){
   }
 }
 carregarHistorico();
-
+carregarBenchmarks();
 document.getElementById('calc-btn').addEventListener('click', async () => {
   if (!pnlData || !relData) return;
   clearStatus();
   document.getElementById('results').classList.remove('show');
   document.getElementById('calc-btn').disabled = true;
   document.getElementById('loading').classList.add('show');
-
   const payload = {
     dormidas: relData.dormidas,
     alimentos_por_dormida: pnlData.alimentos_por_dormida,
@@ -795,7 +715,6 @@ document.getElementById('calc-btn').addEventListener('click', async () => {
     produtividade_governanca: 20,
     nome: document.getElementById('nome-simulacao').value.trim() || undefined
   };
-
   try{
     const resp = await fetch(API_URL, {
       method: 'POST',
@@ -817,30 +736,39 @@ document.getElementById('calc-btn').addEventListener('click', async () => {
     document.getElementById('calc-btn').disabled = false;
   }
 });
-
-// Metas recalculadas a partir do P&L em 28/08/2026 (19 meses: Jan-Dez/2025 + Jan-Jul/2026).
-// 2024 não está disponível na consulta atual do P&L (query externa não traz esse ano) e
-// Agosto/2026 foi excluído por estar parcial. Ver documento de continuidade v5 para detalhes.
-// Grupo = melhor mês / média entre os 6 Resorts do grupo (Touros, Cumbuco, Alagoas, Mares, Cabo, Angra).
-// Historico = melhor mês / média do próprio Touros.
-// dirMeta (Alimentos e Bebidas) = metas oficiais da Direção, ambas em R$/dormida.
-const BENCHMARKS = {
-  rubricas: {
-    alimentos:    {dirMeta:67.00, grupo:{meta:56.05, media:79.40}, hist:{meta:43.55, media:75.05}},
-    bebidas:      {dirMeta:15.00, grupo:{meta:18.83, media:25.03}, hist:{meta:15.29, media:26.77}},
-    comunicacoes: {grupo:{meta:0.14, media:0.36}, hist:{meta:0.02, media:0.04}},
-    energia:      {grupo:{meta:14.87, media:25.06}, hist:{meta:10.41, media:19.99}},
-    manutencao:   {grupo:{meta:8.48, media:25.15}, hist:{meta:7.08, media:24.49}},
-    operacionais: {grupo:{meta:40.00, media:62.13}, hist:{meta:30.48, media:61.55}},
-    pessoal:      {grupo:{meta:53.85, media:91.88}, hist:{meta:50.04, media:97.69}},
-  },
-  resultado: {
-    gopPct:            {grupo:{meta:59.96, media:35.44}, hist:{meta:64.36, media:38.74}},
-    receitaPorDormida: {grupo:{meta:614.27, media:501.28}, hist:{meta:648.92, media:507.37}},
-    adr:               {grupo:{meta:1575.77, media:1270.63}, hist:{meta:1573.98, media:1224.59}},
-  }
+// Metas agora vêm do endpoint /metas da API (tabela `metas` no Neon), em vez de
+// ficarem fixas no código. Ver documento de continuidade para histórico anterior.
+let BENCHMARKS = { rubricas: {}, resultado: {} };
+const CHAVE_PARA_SECAO = {
+  alimentos: 'rubricas', bebidas: 'rubricas', comunicacoes: 'rubricas',
+  energia: 'rubricas', manutencao: 'rubricas', operacionais: 'rubricas', pessoal: 'rubricas',
+  gop_pct: 'resultado', adr: 'resultado', receita_dormida: 'resultado'
 };
-
+const CHAVE_PARA_NOME_INTERNO = {
+  gop_pct: 'gopPct', receita_dormida: 'receitaPorDormida', adr: 'adr'
+};
+async function carregarBenchmarks(){
+  try{
+    const resp = await fetch('https://sigg-core.onrender.com/metas');
+    const lista = await resp.json();
+    const novo = { rubricas: {}, resultado: {} };
+    lista.forEach(item => {
+      const secao = CHAVE_PARA_SECAO[item.chave] || 'rubricas';
+      const nomeInterno = CHAVE_PARA_NOME_INTERNO[item.chave] || item.chave;
+      const entry = {
+        grupo: { meta: item.meta_grupo, media: item.media_grupo },
+        hist:  { meta: item.meta_hist,  media: item.media_hist }
+      };
+      if (item.meta_oficial !== null && item.meta_oficial !== undefined){
+        entry.dirMeta = item.meta_oficial;
+      }
+      novo[secao][nomeInterno] = entry;
+    });
+    BENCHMARKS = novo;
+  } catch(err){
+    console.error('Não foi possível carregar as metas da API, mantendo valores em branco.', err);
+  }
+}
 function statusCusto(real, ref){
   if(real <= ref.meta) return "verde";
   if(real <= ref.media) return "amarelo";
@@ -867,18 +795,15 @@ function metaBoxesHtml(real, bench, isPct){
     ${metaBoxHtml('Histórico Touros', stHist, bench.hist.meta, bench.hist.media, isPct)}
   </div>`;
 }
-
 function pick(obj, keys){
   for (const k of keys){
     if (obj[k] !== undefined && obj[k] !== null) return obj[k];
   }
   return null;
 }
-
 function renderResults(json){
   const kpiGrid = document.getElementById('kpi-grid');
   const cardsHtml = [];
-
   const dormidas = pick(json, ['dormidas']);
   const receitaTotal = pick(json, ['receita_total','receitaTotal','receita']);
   const custosTotais = pick(json, ['custos_totais','custosTotais']);
@@ -886,7 +811,6 @@ function renderResults(json){
   const gopPorDormida = pick(json, ['gop_por_dormida','gopPorDormida']);
   const margemGop = pick(json, ['margem_gop','margemGop','margem_gop_pct']);
   const camareiras = pick(json, ['camareiras_necessarias','camareirasNecessarias']);
-
   function card(label, value, hl, subHtml, span2){
     return `<div class="kpi${hl ? ' highlight' : ''}${span2 ? ' span2' : ''}">
       <div class="kpi-label">${label}</div>
@@ -894,13 +818,11 @@ function renderResults(json){
       ${subHtml || ''}
     </div>`;
   }
-
   if (dormidas !== null) cardsHtml.push(card('Dormidas', fmtNum(dormidas), false));
   if (receitaTotal !== null) cardsHtml.push(card('Receita Total', fmtBRL(receitaTotal), false));
   if (custosTotais !== null) cardsHtml.push(card('Custos Totais', fmtBRL(custosTotais), false));
   if (gop !== null) cardsHtml.push(card('GOP', fmtBRL(gop), true));
   if (gopPorDormida !== null) cardsHtml.push(card('GOP por Dormida', fmtBRL(gopPorDormida), false));
-
   if (margemGop !== null){
     const pct = margemGop <= 1 ? margemGop * 100 : margemGop;
     cardsHtml.push(card('Margem GOP', fmtNum(pct, 2) + '%', true, metaBoxesHtml(pct, BENCHMARKS.resultado.gopPct, true), true));
@@ -910,8 +832,6 @@ function renderResults(json){
     cardsHtml.push(card('Receita / Dormida', fmtBRL(rd), false, metaBoxesHtml(rd, BENCHMARKS.resultado.receitaPorDormida, true), true));
   }
   if (camareiras !== null) cardsHtml.push(card('Camareiras necessárias/dia', fmtNum(camareiras, 0), true));
-
-  // Detalhamento de custos por rubrica — agora com R$/dormida e faróis (Grupo Resorts / Histórico Touros).
   const categoryLabels = {
     alimentos: 'Alimentos',
     bebidas: 'Bebidas',
@@ -924,7 +844,6 @@ function renderResults(json){
   const knownKeys = ['dormidas','receita_total','receitaTotal','receita','custos_totais','custosTotais','gop',
     'gop_por_dormida','gopPorDormida','margem_gop','margemGop','margem_gop_pct',
     'camareiras_necessarias','camareirasNecessarias', 'simulacao_id', ...Object.keys(categoryLabels)];
-
   for (const [key, label] of Object.entries(categoryLabels)){
     if (json[key] !== undefined && json[key] !== null){
       const total = Number(json[key]);
@@ -945,16 +864,12 @@ function renderResults(json){
       cardsHtml.push(card(label, valueStr, false, sub, true));
     }
   }
-
-  // Qualquer outra chave não prevista acima também é mostrada, para não esconder nada.
   for (const [k,v] of Object.entries(json)){
     if (!knownKeys.includes(k) && typeof v !== 'object'){
       cardsHtml.push(card(k, v, false));
     }
   }
-
   kpiGrid.innerHTML = cardsHtml.join('');
-
   document.getElementById('raw-json').textContent = JSON.stringify(json, null, 2);
   document.getElementById('results').classList.add('show');
 }
