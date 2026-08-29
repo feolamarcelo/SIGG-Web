@@ -377,58 +377,76 @@
 <footer>SIGG-Core · gerado a partir de P&L - NOVO BR 08082026.xlsx · protótipo de fechamento</footer>
 
 <script>
+const PLANOS_API = 'https://sigg-core.onrender.com/planos_acao';
+
 function togglePlano() {
   document.getElementById('planoDetail').classList.toggle('open');
 }
-function loadAcoes() {
-  try { return JSON.parse(localStorage.getItem('sigg_plano_acao')||'[]'); } catch(e) { return []; }
-}
-function saveAcoes(list) {
-  localStorage.setItem('sigg_plano_acao', JSON.stringify(list));
-}
 function statusClass(s) {
-  if (s==='Pendente') return 'farol-warn';
-  if (s==='Em andamento') return 'farol-ok';
-  if (s==='Atrasada') return 'farol-bad';
+  if (s==='PENDENTE') return 'farol-warn';
+  if (s==='EM ANDAMENTO') return 'farol-ok';
+  if (s==='ATRASADA') return 'farol-bad';
   return 'farol-nd';
 }
-function render() {
-  const list = loadAcoes();
+function statusLabel(s){
+  const map = {PENDENTE:'Pendente', 'EM ANDAMENTO':'Em andamento', ATRASADA:'Atrasada', CONCLUIDA:'Concluída'};
+  return map[s] || s;
+}
+function renderLista(list){
   const body = document.getElementById('planoBody');
   body.innerHTML = '';
   let pend=0, and=0, atr=0;
-  list.forEach((a, i) => {
-    if (a.status==='Pendente') pend++;
-    if (a.status==='Em andamento') and++;
-    if (a.status==='Atrasada') atr++;
+  list.forEach((a) => {
+    if (a.status==='PENDENTE') pend++;
+    if (a.status==='EM ANDAMENTO') and++;
+    if (a.status==='ATRASADA') atr++;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${a.acao}</td><td><span class="status-tag ${statusClass(a.status)}">${a.status}</span></td><td>${a.prazo||'-'}</td><td><button onclick="removeAcao(${i})" style="background:var(--bad-fg)">Remover</button></td>`;
+    tr.innerHTML = `<td>${a.descricao}</td><td><span class="status-tag ${statusClass(a.status)}">${statusLabel(a.status)}</span></td><td>${a.prazo||'-'}</td><td><button onclick="removeAcao(${a.id})" style="background:var(--bad-fg)">Remover</button></td>`;
     body.appendChild(tr);
   });
   document.getElementById('cntPend').textContent = pend;
   document.getElementById('cntAnd').textContent = and;
   document.getElementById('cntAtr').textContent = atr;
 }
-function addAcao() {
-  const acao = document.getElementById('novaAcao').value.trim();
-  const status = document.getElementById('novoStatus').value;
-  const prazo = document.getElementById('novoPrazo').value;
-  if (!acao) return;
-  const list = loadAcoes();
-  list.push({acao, status, prazo});
-  saveAcoes(list);
-  document.getElementById('novaAcao').value='';
-  document.getElementById('novoPrazo').value='';
-  render();
+async function render(){
+  const body = document.getElementById('planoBody');
+  body.innerHTML = '<tr><td colspan="4" style="color:var(--muted);">Carregando plano de ação…</td></tr>';
+  try{
+    const resp = await fetch(PLANOS_API);
+    const lista = await resp.json();
+    renderLista(Array.isArray(lista) ? lista : []);
+  } catch(err){
+    body.innerHTML = '<tr><td colspan="4" style="color:var(--bad-fg);">Não foi possível carregar o plano de ação agora.</td></tr>';
+    console.error('Erro ao carregar /planos_acao:', err);
+  }
 }
-function removeAcao(i) {
-  const list = loadAcoes();
-  list.splice(i,1);
-  saveAcoes(list);
-  render();
+async function addAcao() {
+  const descricao = document.getElementById('novaAcao').value.trim();
+  const statusSelecionado = document.getElementById('novoStatus').value;
+  const prazo = document.getElementById('novoPrazo').value;
+  if (!descricao) return;
+  const statusMap = {Pendente:'PENDENTE', 'Em andamento':'EM ANDAMENTO', Atrasada:'ATRASADA', Concluída:'CONCLUIDA'};
+  try{
+    await fetch(PLANOS_API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({descricao, status: statusMap[statusSelecionado] || 'PENDENTE', prazo: prazo || null})
+    });
+    document.getElementById('novaAcao').value='';
+    document.getElementById('novoPrazo').value='';
+    render();
+  } catch(err){
+    alert('Não foi possível gravar a ação agora. Tente novamente em instantes.');
+    console.error('Erro ao gravar em /planos_acao:', err);
+  }
+}
+async function removeAcao(id) {
+  try{
+    await fetch(PLANOS_API + '/' + id, { method: 'DELETE' });
+    render();
+  } catch(err){
+    alert('Não foi possível remover a ação agora. Tente novamente em instantes.');
+    console.error('Erro ao remover em /planos_acao:', err);
+  }
 }
 render();
-</script>
-
-</body>
-</html>
