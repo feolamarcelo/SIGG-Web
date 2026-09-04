@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>SIGG - Upload de Planilhas do Mês</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; background:#f5f5f5; }
+  h1 { color: #1a3c5e; }
+  .card { background: white; border-radius: 10px; padding: 20px 25px; margin-bottom: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+  label { display:block; margin-top: 12px; font-weight: bold; color:#333; }
+  input[type="month"], input[type="file"] { margin-top: 6px; padding: 8px; width: 100%; box-sizing:border-box; }
+  button { margin-top: 18px; padding: 12px 20px; background:#1a7a3c; color:white; border:none; border-radius:6px; font-size:16px; cursor:pointer; }
+  button:hover { background:#145c2d; }
+  button:disabled { background:#999; cursor:not-allowed; }
+  .resultado { margin-top: 15px; padding: 12px; border-radius:6px; font-size: 14px; white-space: pre-wrap; }
+  .ok { background:#e3f7e9; border:1px solid #1a7a3c; color:#0e4d20; }
+  .erro { background:#fdeaea; border:1px solid #c0392b; color:#7a1f14; }
+  .aviso { background:#fff8e1; border:1px solid #f0b429; color:#7a5c00; padding:10px; border-radius:6px; margin-bottom:20px; font-size:14px;}
+</style>
+</head>
+<body>
+
+<h1>📤 Upload de Planilhas do Mês</h1>
+
+<div class="aviso">
+⚠️ Esta é uma tela de <b>teste</b>. Se der algum erro na primeira vez, não tem problema —
+me avise o texto exato que aparecer para eu ajustar. Nada será perdido se der erro.
+</div>
+
+<div class="card">
+  <h2>1️⃣ Trabalho Extra (diaristas)</h2>
+  <label>Mês de referência:</label>
+  <input type="month" id="mesExtra">
+  <label>Arquivo Excel (Relação de Trabalho Extra):</label>
+  <input type="file" id="arquivoExtra" accept=".xlsx">
+  <button onclick="enviar('extra')">Enviar Trabalho Extra</button>
+  <div id="resultadoExtra"></div>
+</div>
+
+<div class="card">
+  <h2>2️⃣ Banco de Horas</h2>
+  <label>Mês de referência:</label>
+  <input type="month" id="mesBanco">
+  <label>Arquivo Excel (Banco de Horas):</label>
+  <input type="file" id="arquivoBanco" accept=".xlsx">
+  <button onclick="enviar('banco')">Enviar Banco de Horas</button>
+  <div id="resultadoBanco"></div>
+</div>
+
+<script>
+const API_BASE = "https://sigg-core.onrender.com";
+
+async function enviar(tipo) {
+  const config = tipo === 'extra'
+    ? { mesId: 'mesExtra', arquivoId: 'arquivoExtra', resultadoId: 'resultadoExtra', endpoint: '/upload/trabalho_extra' }
+    : { mesId: 'mesBanco', arquivoId: 'arquivoBanco', resultadoId: 'resultadoBanco', endpoint: '/upload/banco_horas' };
+
+  const mesInput = document.getElementById(config.mesId).value; // formato "2026-07"
+  const arquivoInput = document.getElementById(config.arquivoId).files[0];
+  const resultadoDiv = document.getElementById(config.resultadoId);
+
+  resultadoDiv.className = 'resultado';
+  resultadoDiv.textContent = '';
+
+  if (!mesInput) {
+    resultadoDiv.className = 'resultado erro';
+    resultadoDiv.textContent = '⚠️ Escolha o mês de referência.';
+    return;
+  }
+  if (!arquivoInput) {
+    resultadoDiv.className = 'resultado erro';
+    resultadoDiv.textContent = '⚠️ Escolha o arquivo Excel.';
+    return;
+  }
+
+  const mesReferencia = mesInput + '-01'; // "2026-07" -> "2026-07-01"
+
+  const formData = new FormData();
+  formData.append('arquivo', arquivoInput);
+  formData.append('mes_referencia', mesReferencia);
+
+  resultadoDiv.className = 'resultado';
+  resultadoDiv.textContent = '⏳ Enviando e processando... (pode levar até 30s na primeira chamada do dia)';
+
+  try {
+    const resposta = await fetch(API_BASE + config.endpoint, {
+      method: 'POST',
+      body: formData
+    });
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      resultadoDiv.className = 'resultado erro';
+      resultadoDiv.textContent = '❌ Erro: ' + (dados.erro || JSON.stringify(dados));
+      return;
+    }
+
+    resultadoDiv.className = 'resultado ok';
+    if (tipo === 'extra') {
+      let texto = '✅ Enviado com sucesso!\n\n';
+      dados.departamentos_gravados.forEach(function(d) {
+        texto += d.departamento + ': ' + d.quantidade_diarias + ' diárias — R$ ' + d.custo_total.toFixed(2) + '\n';
+      });
+      resultadoDiv.textContent = texto;
+    } else {
+      resultadoDiv.textContent = '✅ Enviado com sucesso!\n\n' +
+        'Colaboradores gravados: ' + dados.colaboradores_gravados + '\n' +
+        'Com alerta (±50h): ' + dados.total_com_alerta;
+    }
+  } catch (erro) {
+    resultadoDiv.className = 'resultado erro';
+    resultadoDiv.textContent = '❌ Erro de conexão: ' + erro.message;
+  }
+}
+</script>
+
+</body>
+</html>
